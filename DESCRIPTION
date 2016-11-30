@@ -1,0 +1,12 @@
+Package: IceT
+Type: Package
+Title: Identification of Cell Types using Recovered Gene Expression
+Version: 0.1
+Date: 2016-11-28
+Author: Rong Ma <rongm@mail.med.upenn.edu>
+Maintainer: Rong Ma <rongm@mail.med.upenn.edu>
+Description: This package is designed for identifying cell types using recovered
+    or imputated gene expression in single-cell RNA sequencing study.
+License: MIT
+LazyData: TRUE
+RoxygenNote: 5.0.1
