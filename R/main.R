@@ -101,6 +101,7 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
 
   if(imputation == TRUE) {
 
+  recover.data[recover.data<0.6] = 0
   recover.data.log = log(recover.data)
   recover.data.log[which(recover.data.log == -Inf)] = unique(sort(recover.data.log))[2]
 
@@ -112,6 +113,8 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
     }
   }
   reduced.data.log = log(reduced.data)
+
+  return.data = list(recover=recover.data, recover.log=recover.data.log, reduced=reduced.data, reduced.log=reduced.data.log)
   }
 
 
@@ -127,12 +130,17 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
     null.index = target.index[which(cv[target.index]<quantile(cv[target.index],0.5))]
     target.index = target.index[which(cv[target.index]>quantile(cv[target.index],0.5))]
 
+    message("Initial gene selection succeed!")
+
     #banwidth selection
     bwd = seq(1,3,0.1)
     criterion = c()
     for(p in 1:length(bwd)){
       modal = c()
       for(i in 1:length(null.index)){
+        if(is.na(sd(reduced.data.log[null.index[i],],na.rm=T))) {
+          message("Error: Larger threshold should be used!")
+          break}
         den = density(reduced.data.log[null.index[i],],
                       if(sd(reduced.data.log[null.index[i],],na.rm=T)==0) bw = 1
                       else
@@ -148,6 +156,7 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
     }
     bwdindex = max(which(criterion<fdr*dim(recover.data)[1]))
 
+    message("Bandwidth selection succeed!")
 
     modal=c()
     for(i in 1:length(target.index)){
@@ -171,7 +180,7 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
     cluster = (dbscan.detect$cluster)
     num_of_clusters = length(levels(as.factor(cluster)))
 
-    result.icet = list(points = rtsne$Y, cluster = cluster, selected_genes = total.detection.best.log, num_of_clusters = num_of_clusters)
+    result.icet = list(data = return.data, points = rtsne$Y, cluster = cluster, selected_genes = total.detection.best.log, num_of_clusters = num_of_clusters)
   } else{
     #initial elimination
     cv = c()
@@ -250,14 +259,30 @@ icet <- function(recover.data, ratio=20, threshold = 0.5, fdr = 0.002, imputatio
 #' @param numeric; Perplexity parameter in Rtsne function (default: 50). Can only be changed when reset = TRUE.
 #' @param eps Reachability distance in dbscan function (default: 2). Can only be changed when reset = TRUE.
 #' @param MinPts Reachability minimum no. of points in dbscan function (default: 5). Can only be changed when reset = TRUE.
+#' @param set.color Prescribe the colors for the data representations. Defaul as the colors by IceT.
 #' @author Rong Ma, University of Pennsylvania <rongm@mail.med.upenn.edu>
 #' @export
-icet.plot <- function(icet, pch = 20, reset = FALSE, recover.data = NA, imputation = FALSE, max_iter = 1000, perplexity = 50, eps = 2, MinPts = 5){
+icet.plot <- function(icet, pch = 20, reset = FALSE, recover.data = NA, imputation = FALSE, max_iter = 1000, perplexity = 50,
+                      eps = 2, MinPts = 5, set.color = NA){
 if(reset == TRUE){
     clustset = recover.data$recover.log[icet$selected_genes,]
     rtsne = Rtsne(t(clustset), check_duplicates = F, max_iter = max_iter, perplexity=perplexity)
     dbscan.detect = dbscan(rtsne$Y, eps = eps, MinPts = MinPts)
-    plot(rtsne$Y, col = rainbow(length(levels(as.factor(dbscan.detect$cluster))))[as.factor(dbscan.detect$cluster)], pch = pch)
-  } else
-    plot(icet$points[,1], icet$points[,2], col = rainbow(icet$num_of_clusters)[as.factor(icet$cluster)], pch = pch)
+    if(is.na(set.color)) {
+      plot(rtsne$Y, col = rainbow(length(levels(as.factor(dbscan.detect$cluster))))[as.factor(dbscan.detect$cluster)], pch = pch)
+      result.plot = list(points = rtsne$Y, cluster = dbscan.detect$cluster)
+      return(result.plot)
+      } else{
+      plot(rtsne$Y, col = set.color, pch = pch)}
+      result.plot = list(points = rtsne$Y, cluster = dbscan.detect$cluster)
+      return(result.plot)
+} else{
+
+    if(is.na(set.color)) {
+      plot(icet$points[,1], icet$points[,2], col = rainbow(icet$num_of_clusters)[as.factor(icet$cluster)], pch = pch)
+    } else{
+      plot(icet$points[,1], icet$points[,2], col = set.color, pch = pch)
+    }
+}
+
 }

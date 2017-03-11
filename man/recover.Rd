@@ -7,7 +7,7 @@
 recover(X, est.ab)
 }
 \arguments{
-\item{X}{The UMI based gene expression data set (can be data.frame or matrix) with columns indexing the cell id and the rows indexing the genes.}
+\item{X}{The gene expression data set (can be data.frame or matrix) with columns indexing the cell id and the rows indexing the genes.}
 
 \item{est.ab}{A two-column data frame including the estimated Alpha and Beta for each cell.}
 }

@@ -4,10 +4,10 @@
 \alias{ab.est}
 \title{Estimate the parameters via ERCC spike-in for TASC model.}
 \usage{
-ab.est(ercc, y)
+ab.est(x, y)
 }
 \arguments{
-\item{ercc}{A vector indicating molecule numbers of ERCC spike-in's in each cell.}
+\item{x}{A vector indicating molecule numbers of ERCC spike-in's in each cell.}
 
 \item{y}{A matrix or data frame, with each row indicating the read counts of ERCC spike-in's in each cell.}
 }

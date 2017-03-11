@@ -2,4 +2,6 @@
 
 export(ab.est)
 export(hello)
+export(icet)
+export(icet.plot)
 export(recover)
